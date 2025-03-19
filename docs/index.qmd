@@ -9,6 +9,11 @@ editor: visual
 
 ## Change Detection for Continuous Forest Inventories
 
+```{r}
+#| include: false
+knitr::opts_knit$set(root.dir = "D:/SYNC/Sync/silva21/misc/anew-rs-gis/R")
+```
+
 There are a variety of change detection algorithms for use on optical satellite imagery. Some (e.g., LandTrendr or Composite2Change) use a single pixel value for each year, and track those values through time. To attempt to detect changes in near-real time, another class of algorithms uses all available data throughout the year and looks for patterns in the cyclical trend of vegetation.
 
 In a [recent paper](https://doi.org/10.1016/j.isprsjprs.2023.02.002), the BEAST algorithm (Bayesian Estimator of Abrupt Change, Seasonality, and Trend) was found to do best in temperate North American forests featuring long data gaps due to persistent clouds and snow over winter.
