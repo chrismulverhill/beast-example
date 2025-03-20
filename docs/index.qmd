@@ -47,17 +47,20 @@ fl = list.files("nbr-clips", pattern = ".tif$", full.names = T)
 # let's look at a few of the NBR images to get a sense of what to expect in the results
 example.dates = c("2013125", "2015131", "2018282", "2020124")
 
-# here the date format is YYYYDDD, where YYYY is the year, and DDD is the julian date
+dates.ymd = as.Date(example.dates, format = "%Y%j") %>% 
+            as.character()
 
+# here the date format is YYYYDDD, where YYYY is the year, and DDD is the julian date
 date.range = str_remove_all(fl, "[:alpha:]|[:punct:]") %>% 
              str_sort(numeric = T) %>% 
              .[c(1, length(.))] %>% 
              as.Date(format = "%Y%j")
 
+# plot the four example images and the date range for the time series
 str_subset(fl, paste0(example.dates, collapse = "|")) %>%
   str_sort(numeric = T) %>% 
   rast() %>% 
-  setNames(example.dates) %>% 
+  setNames(dates.ymd) %>% 
   plot(col = viridisLite::viridis(255), range = c(-1, 1))
 
 paste0("Date range: ", date.range[1], " to ", date.range[2])
