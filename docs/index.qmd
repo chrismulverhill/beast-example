@@ -7,12 +7,12 @@ format:
 editor: visual
 ---
 
-## Change Detection for Continuous Forest Inventories
-
 ```{r}
 #| include: false
 knitr::opts_knit$set(root.dir = "D:/SYNC/Sync/silva21/misc/anew-rs-gis/R")
 ```
+
+## Change Detection for Continuous Forest Inventories
 
 There are a variety of change detection algorithms for use on optical satellite imagery. Some (e.g., LandTrendr or Composite2Change) use a single pixel value for each year, and track those values through time. To attempt to detect changes in near-real time, another class of algorithms uses all available data throughout the year and looks for patterns in the cyclical trend of vegetation.
 
@@ -49,21 +49,26 @@ example.dates = c("2013125", "2015131", "2018282", "2020124")
 
 # here the date format is YYYYDDD, where YYYY is the year, and DDD is the julian date
 
+date.range = str_remove_all(fl, "[:alpha:]|[:punct:]") %>% 
+             str_sort(numeric = T) %>% 
+             .[c(1, length(.))] %>% 
+             as.Date(format = "%Y%j")
+
 str_subset(fl, paste0(example.dates, collapse = "|")) %>%
   str_sort(numeric = T) %>% 
   rast() %>% 
   setNames(example.dates) %>% 
   plot(col = viridisLite::viridis(255), range = c(-1, 1))
 
+paste0("Date range: ", date.range[1], " to ", date.range[2])
 ```
 
-In the above images, it looks like there was some disturbance between 2015 and 2018. In fact, there was a large wildfire here in 2017 - the Plateau Complex fire.
+Our time series runs from 2000 to 2021 (inclusive). In the above images, it looks like there was some disturbance between 2015 and 2018. In fact, there was a large wildfire here in 2017 - the Plateau Complex fire.
 
 Now it's time to set up the the BEAST algorithm. Here, we bring in our image stack (`fl`) and convert it to an array to run it through BEAST.
 
 ```{r}
-# run beast 
-# First, see if BEAST has already been run and if it's produced all expected output files
+# Name the output file so we can skip this process if it's already been run
 rds.out = paste0("beast-outputs/rds-beast-nbr.rds")
 
 # make a raster stack of all files
@@ -104,18 +109,18 @@ if(!file.exists(rds.out)){
   metadata$whichDimIsTime = 3 # The third dimension (image stack) represents time
   metadata$deltaTime = 14/365 # Aggregate the irregular time series at a biweekly interval
   metadata$period = 1.0 # The period is 1 year
-  metadata$maxMissingRate = 0.99
+  metadata$maxMissingRate = 0.99 # in a given pixel, how much missing data will be allowed?
   
-  # if it's NBR, we also want to see the probability of change
+  # we need to add a couple of parameters to the "extra" list, including the number of parallel threads on which to run the algorithm
   extra$tallyPosNegTrendJump <- TRUE
-  extra$numParThreads = 0 # If 0, use all available cores. If >0, used to specify the total number of threads
+  extra$numParThreads = 0 # If 0, use all available cores. If >0, used to specify the total number of cores
 
   # wrap it in a function that keeps all console outputs quiet
   # we assigned the metadata above, but the prior and extra are in the "0_functions.r" file
   capture.output({o = beast123(indx.arr, season = "harmonic",
                                metadata = metadata, extra = extra, prior = prior)}, file = nullfile())
   
-  # this is a large file, so make a smaller version to only keep what we need
+  # o is a large file, so make a smaller version to only keep what we need
   o2 = list(o$time, o$trend$Y, o$season$Y,
             o$trend$neg_cp, o$trend$neg_cpPr,
             o$trend$neg_cpAbruptChange)
@@ -142,26 +147,31 @@ if(!file.exists("beast-outputs/biggest_pr.tif")){
   # this raster needs to be the same dimensions as the beast output
   dim.rast = paste0(dim(indx.stk)[1:2], collapse = "x")
   dim.beast = paste0(dim(o2$chg.yr)[1:2], collapse = "x")
-  if(dim.rast != dim.beast){cat(" - Dimensions not equal; skipping"); return()}
+  if(dim.rast != dim.beast){cat(" - Dimensions not equal; ending process"); return()}
   
-  # first, the most recent change
+  # first, transform the array to rows
   cl = makeCluster(detectCores() / 2)
   clusterEvalQ(cl, {library(dplyr); library(data.table)})
   
+  # years of change
   dt.yr = parApply(cl = cl, o2$chg.yr, MARGIN = c(1, 2), 
                    function(x){as.numeric(x) %>% t() %>% as.data.frame()}) %>%
           rbindlist()
   
+  # probability of change
   dt.prob = parApply(cl = cl, o2$chg.prob, MARGIN = c(1, 2), 
                      function(x){as.numeric(x) %>% t() %>% as.data.frame()}) %>%
             rbindlist()
   
+  # magnitude of change
   dt.mag = parApply(cl = cl, o2$chg.mag, MARGIN = c(1, 2), 
                     function(x){as.numeric(x) %>% t() %>% as.data.frame()}) %>%
            rbindlist()
   
+  # add these to the parallel cluster
   clusterExport(cl, c("dt.yr", "dt.prob", "dt.mag"))
   
+  # what was the most recent change?
   recent.change = parLapply(cl = cl, 1:nrow(dt.yr), fun = function(i){
     indx = which.max(dt.yr[i,]) %>% as.numeric()
     
@@ -176,6 +186,7 @@ if(!file.exists("beast-outputs/biggest_pr.tif")){
   }) %>% 
     rbindlist()
   
+  # what was the largest change?
   biggest.change = parLapply(cl = cl, 1:nrow(dt.yr), fun = function(i){
     indx = which.max(dt.prob[i,]) %>% as.numeric()
     
@@ -191,7 +202,7 @@ if(!file.exists("beast-outputs/biggest_pr.tif")){
   }) %>% 
     rbindlist()
   
-  stopCluster(cl)
+  stopCluster(cl) # close the parallel cluster
   
   # combine the outputs
   out.dt = cbind(recent.change, biggest.change)
@@ -199,6 +210,7 @@ if(!file.exists("beast-outputs/biggest_pr.tif")){
   
   # output the rasters
   for(cur.nm in names(out.dt)){
+    # convert the values in the table to an array with the same dimensions as before
     vals = pull(out.dt, cur.nm) %>% 
            matrix(nrow = nrow(o2$chg.yr), ncol = ncol(o2$chg.yr)) %>% 
            t() %>% 
@@ -206,8 +218,10 @@ if(!file.exists("beast-outputs/biggest_pr.tif")){
     
     rb = indx.stk
     
+    # put those values into the raster
     values(rb) = vals
     
+    # export it to disk
     writeRaster(rb, paste0("beast-outputs/", cur.nm, ".tif"), overwrite = T)
   }
 
@@ -217,12 +231,12 @@ if(!file.exists("beast-outputs/biggest_pr.tif")){
 
 ## Deriving and graphing outputs
 
-Finally, let's take a look at the outputs. Since BEAST detects lots of changes, we can filter out only those with a high probability, set by a threshold called `min.chg.prob`.
+Finally, let's take a look at the outputs. Since BEAST detects lots of changes, we can filter out only those with a high probability, set by a threshold we will call `min.chg.prob`.
 
-In this example, there are three images selected which show a range of disturbance histories. We'll show the BEAST outputs for all three, including the smoothed trend and the mapped disturbance probabilities.
+In this code, there are three example pixels selected which show a range of disturbance histories. We'll show the BEAST outputs for all three, including the smoothed vegetation trend and the mapped disturbance probabilities.
 
 ```{r, fig.width=10, fig.height=8, fig.align="center"}
-# clean up the environment
+# clean up the environment (optional)
 # terra::tmpFiles(remove = T); gc(verbose = F)
 
 # let's only consider something is a "change" if the BEAST probability is over a certain threshold (here, 0.5)
@@ -238,7 +252,7 @@ row.col.ids = as.data.frame(indx.stk, xy = T, na.rm = F) %>%
 # make a raster where pixel values are the row and column IDs from the above table
 row.col.rast = rast(as.data.frame(row.col.ids), type = "xyz", crs = crs(indx.stk))
 
-# There are three example pixels to look at
+# There are three example pixels, listed with their UTM coordinates
 a.xy = c(442216, 5882983)
 b.xy = c(445096, 5877673)
 c.xy = c(456700, 5871102)
@@ -251,7 +265,7 @@ c.rc = extract(row.col.rast, c.xy) %>% na.omit() %>% mutate(name = "Pixel C")
 # in this case, the output has already been run and saved to the path below
 if(!file.exists("beast-outputs/beast_changes.csv")){
   
-  # read in the BEAST output
+  # read in the BEAST output from a previous step
   o2 = read_rds(rds.out)
   
   # get the smoothed NBR values ("Y") from the BEAST output

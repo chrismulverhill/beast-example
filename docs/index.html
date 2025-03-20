@@ -132,11 +132,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># here the date format is YYYYDDD, where YYYY is the year, and DDD is the julian date</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">str_subset</span>(fl, <span class="fu">paste0</span>(example.dates, <span class="at">collapse =</span> <span class="st">"|"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_sort</span>(<span class="at">numeric =</span> T) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rast</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(example.dates) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="at">col =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">255</span>), <span class="at">range =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>date.range <span class="ot">=</span> <span class="fu">str_remove_all</span>(fl, <span class="st">"[:alpha:]|[:punct:]"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>             <span class="fu">str_sort</span>(<span class="at">numeric =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>             .[<span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">length</span>(.))] <span class="sc">%&gt;%</span> </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>             <span class="fu">as.Date</span>(<span class="at">format =</span> <span class="st">"%Y%j"</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">str_subset</span>(fl, <span class="fu">paste0</span>(example.dates, <span class="at">collapse =</span> <span class="st">"|"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_sort</span>(<span class="at">numeric =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rast</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(example.dates) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="at">col =</span> viridisLite<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">255</span>), <span class="at">range =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -144,25 +149,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Date range: "</span>, date.range[<span class="dv">1</span>], <span class="st">" to "</span>, date.range[<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Date range: 2000-01-18 to 2021-11-22"</code></pre>
 </div>
-<p>In the above images, it looks like there was some disturbance between 2015 and 2018. In fact, there was a large wildfire here in 2017 - the Plateau Complex fire.</p>
+</div>
+<p>Our time series runs from 2000 to 2021 (inclusive). In the above images, it looks like there was some disturbance between 2015 and 2018. In fact, there was a large wildfire here in 2017 - the Plateau Complex fire.</p>
 <p>Now it’s time to set up the the BEAST algorithm. Here, we bring in our image stack (<code>fl</code>) and convert it to an array to run it through BEAST.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run beast </span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># First, see if BEAST has already been run and if it's produced all expected output files</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>rds.out <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"beast-outputs/rds-beast-nbr.rds"</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># make a raster stack of all files</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>indx.stk <span class="ot">&lt;-</span> <span class="fu">rast</span>(fl)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Turn the stack into an array for quicker calculation</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>indx.arr <span class="ot">=</span> <span class="fu">as.array</span>(indx.stk)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># leave this variable as a single image to save memory and so the results can be produced with the same geospatial metadata</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>indx.stk <span class="ot">=</span> indx.stk[[<span class="dv">1</span>]]</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># see the size (rows x columns x layers)</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(indx.arr) <span class="co"># If much more than 1200x1200, might want to clip it down a little bit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Name the output file so we can skip this process if it's already been run</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>rds.out <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"beast-outputs/rds-beast-nbr.rds"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># make a raster stack of all files</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>indx.stk <span class="ot">&lt;-</span> <span class="fu">rast</span>(fl)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Turn the stack into an array for quicker calculation</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>indx.arr <span class="ot">=</span> <span class="fu">as.array</span>(indx.stk)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># leave this variable as a single image to save memory and so the results can be produced with the same geospatial metadata</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>indx.stk <span class="ot">=</span> indx.stk[[<span class="dv">1</span>]]</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># see the size (rows x columns x layers)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(indx.arr) <span class="co"># If much more than 1200x1200, might want to clip it down a little bit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 613 776 261</code></pre>
 </div>
@@ -175,254 +183,263 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Now it’s time to run the BEAST algorithm. There are a lot of parameters for this algorithm, so some of them are stored in a separate file (<code>0_functions.r</code>) for convenience. We loaded these in the first block of code at the top of this page.</p>
 <p>In this example, the algorithm was already run and the outputs are in the <code>beast-outputs</code> directory. BEAST took approximately 20 minutes to run this time series.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run BEAST if the output file doesn't already exist</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(rds.out)){</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Make a vector of dates, then add it to the metadata for beast</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Here, the dates are stored in the file name</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  dates <span class="ot">=</span> <span class="fu">str_sub</span>(fl, <span class="at">start =</span> <span class="sc">-</span><span class="dv">11</span>, <span class="at">end =</span> <span class="sc">-</span><span class="dv">5</span>) <span class="sc">%&gt;%</span> <span class="fu">as.Date</span>(<span class="at">format =</span> <span class="st">"%Y%j"</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>time<span class="sc">$</span>year <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">str_sub</span>(<span class="fu">as.character</span>(dates), <span class="at">end =</span> <span class="dv">4</span>))</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>time<span class="sc">$</span>doy <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">str_sub</span>(fl, <span class="at">start =</span> <span class="sc">-</span><span class="dv">7</span>, <span class="at">end =</span> <span class="sc">-</span><span class="dv">5</span>))</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>isRegularOrdered <span class="ot">=</span> <span class="cn">FALSE</span> <span class="co"># The image stack is irregular</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>whichDimIsTime <span class="ot">=</span> <span class="dv">3</span> <span class="co"># The third dimension (image stack) represents time</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>deltaTime <span class="ot">=</span> <span class="dv">14</span><span class="sc">/</span><span class="dv">365</span> <span class="co"># Aggregate the irregular time series at a biweekly interval</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>period <span class="ot">=</span> <span class="fl">1.0</span> <span class="co"># The period is 1 year</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>maxMissingRate <span class="ot">=</span> <span class="fl">0.99</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># if it's NBR, we also want to see the probability of change</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  extra<span class="sc">$</span>tallyPosNegTrendJump <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  extra<span class="sc">$</span>numParThreads <span class="ot">=</span> <span class="dv">0</span> <span class="co"># If 0, use all available cores. If &gt;0, used to specify the total number of threads</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># wrap it in a function that keeps all console outputs quiet</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># we assigned the metadata above, but the prior and extra are in the "0_functions.r" file</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">capture.output</span>({o <span class="ot">=</span> <span class="fu">beast123</span>(indx.arr, <span class="at">season =</span> <span class="st">"harmonic"</span>,</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                               <span class="at">metadata =</span> metadata, <span class="at">extra =</span> extra, <span class="at">prior =</span> prior)}, <span class="at">file =</span> <span class="fu">nullfile</span>())</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># this is a large file, so make a smaller version to only keep what we need</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  o2 <span class="ot">=</span> <span class="fu">list</span>(o<span class="sc">$</span>time, o<span class="sc">$</span>trend<span class="sc">$</span>Y, o<span class="sc">$</span>season<span class="sc">$</span>Y,</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>            o<span class="sc">$</span>trend<span class="sc">$</span>neg_cp, o<span class="sc">$</span>trend<span class="sc">$</span>neg_cpPr,</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>            o<span class="sc">$</span>trend<span class="sc">$</span>neg_cpAbruptChange)</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># assign it some more useful names</span></span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(o2) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"time"</span>, <span class="st">"trend"</span>, <span class="st">"season"</span>,</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>                <span class="st">"chg.yr"</span>, <span class="st">"chg.prob"</span>, <span class="st">"chg.mag"</span>)</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rm</span>(o)</span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># write the file</span></span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_rds</span>(o2, rds.out)</span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run BEAST if the output file doesn't already exist</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(rds.out)){</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Make a vector of dates, then add it to the metadata for beast</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Here, the dates are stored in the file name</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  dates <span class="ot">=</span> <span class="fu">str_sub</span>(fl, <span class="at">start =</span> <span class="sc">-</span><span class="dv">11</span>, <span class="at">end =</span> <span class="sc">-</span><span class="dv">5</span>) <span class="sc">%&gt;%</span> <span class="fu">as.Date</span>(<span class="at">format =</span> <span class="st">"%Y%j"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>time<span class="sc">$</span>year <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">str_sub</span>(<span class="fu">as.character</span>(dates), <span class="at">end =</span> <span class="dv">4</span>))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>time<span class="sc">$</span>doy <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">str_sub</span>(fl, <span class="at">start =</span> <span class="sc">-</span><span class="dv">7</span>, <span class="at">end =</span> <span class="sc">-</span><span class="dv">5</span>))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>isRegularOrdered <span class="ot">=</span> <span class="cn">FALSE</span> <span class="co"># The image stack is irregular</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>whichDimIsTime <span class="ot">=</span> <span class="dv">3</span> <span class="co"># The third dimension (image stack) represents time</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>deltaTime <span class="ot">=</span> <span class="dv">14</span><span class="sc">/</span><span class="dv">365</span> <span class="co"># Aggregate the irregular time series at a biweekly interval</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>period <span class="ot">=</span> <span class="fl">1.0</span> <span class="co"># The period is 1 year</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  metadata<span class="sc">$</span>maxMissingRate <span class="ot">=</span> <span class="fl">0.99</span> <span class="co"># in a given pixel, how much missing data will be allowed?</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># we need to add a couple of parameters to the "extra" list, including the number of parallel threads on which to run the algorithm</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  extra<span class="sc">$</span>tallyPosNegTrendJump <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  extra<span class="sc">$</span>numParThreads <span class="ot">=</span> <span class="dv">0</span> <span class="co"># If 0, use all available cores. If &gt;0, used to specify the total number of cores</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># wrap it in a function that keeps all console outputs quiet</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># we assigned the metadata above, but the prior and extra are in the "0_functions.r" file</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">capture.output</span>({o <span class="ot">=</span> <span class="fu">beast123</span>(indx.arr, <span class="at">season =</span> <span class="st">"harmonic"</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>                               <span class="at">metadata =</span> metadata, <span class="at">extra =</span> extra, <span class="at">prior =</span> prior)}, <span class="at">file =</span> <span class="fu">nullfile</span>())</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># o is a large file, so make a smaller version to only keep what we need</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  o2 <span class="ot">=</span> <span class="fu">list</span>(o<span class="sc">$</span>time, o<span class="sc">$</span>trend<span class="sc">$</span>Y, o<span class="sc">$</span>season<span class="sc">$</span>Y,</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>            o<span class="sc">$</span>trend<span class="sc">$</span>neg_cp, o<span class="sc">$</span>trend<span class="sc">$</span>neg_cpPr,</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>            o<span class="sc">$</span>trend<span class="sc">$</span>neg_cpAbruptChange)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># assign it some more useful names</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(o2) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"time"</span>, <span class="st">"trend"</span>, <span class="st">"season"</span>,</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>                <span class="st">"chg.yr"</span>, <span class="st">"chg.prob"</span>, <span class="st">"chg.mag"</span>)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rm</span>(o)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># write the file</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_rds</span>(o2, rds.out)</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we need to output some rasters to describe the changes that BEAST just detected. Each pixel will have up to 10 detected “changes”, each with a set of descriptive characteristics: the timing, magnitude, and probability of change. Since there can be many detected changes per pixel, let’s make output rasters to look at two per pixel: the most recent change and the largest change (that with the highest probability).</p>
 <p>In this example, the script is set to run in parallel, but this can be changed as needed.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"beast-outputs/biggest_pr.tif"</span>)){</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  o2 <span class="ot">=</span> <span class="fu">read_rds</span>(rds.out)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># this raster needs to be the same dimensions as the beast output</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  dim.rast <span class="ot">=</span> <span class="fu">paste0</span>(<span class="fu">dim</span>(indx.stk)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">collapse =</span> <span class="st">"x"</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  dim.beast <span class="ot">=</span> <span class="fu">paste0</span>(<span class="fu">dim</span>(o2<span class="sc">$</span>chg.yr)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">collapse =</span> <span class="st">"x"</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(dim.rast <span class="sc">!=</span> dim.beast){<span class="fu">cat</span>(<span class="st">" - Dimensions not equal; skipping"</span>); <span class="fu">return</span>()}</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># first, the most recent change</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  cl <span class="ot">=</span> <span class="fu">makeCluster</span>(<span class="fu">detectCores</span>() <span class="sc">/</span> <span class="dv">2</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clusterEvalQ</span>(cl, {<span class="fu">library</span>(dplyr); <span class="fu">library</span>(data.table)})</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  dt.yr <span class="ot">=</span> <span class="fu">parApply</span>(<span class="at">cl =</span> cl, o2<span class="sc">$</span>chg.yr, <span class="at">MARGIN =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), </span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                   <span class="cf">function</span>(x){<span class="fu">as.numeric</span>(x) <span class="sc">%&gt;%</span> <span class="fu">t</span>() <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()}) <span class="sc">%&gt;%</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rbindlist</span>()</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  dt.prob <span class="ot">=</span> <span class="fu">parApply</span>(<span class="at">cl =</span> cl, o2<span class="sc">$</span>chg.prob, <span class="at">MARGIN =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), </span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>                     <span class="cf">function</span>(x){<span class="fu">as.numeric</span>(x) <span class="sc">%&gt;%</span> <span class="fu">t</span>() <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()}) <span class="sc">%&gt;%</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            <span class="fu">rbindlist</span>()</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  dt.mag <span class="ot">=</span> <span class="fu">parApply</span>(<span class="at">cl =</span> cl, o2<span class="sc">$</span>chg.mag, <span class="at">MARGIN =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), </span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">function</span>(x){<span class="fu">as.numeric</span>(x) <span class="sc">%&gt;%</span> <span class="fu">t</span>() <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()}) <span class="sc">%&gt;%</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>           <span class="fu">rbindlist</span>()</span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clusterExport</span>(cl, <span class="fu">c</span>(<span class="st">"dt.yr"</span>, <span class="st">"dt.prob"</span>, <span class="st">"dt.mag"</span>))</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  recent.change <span class="ot">=</span> <span class="fu">parLapply</span>(<span class="at">cl =</span> cl, <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dt.yr), <span class="at">fun =</span> <span class="cf">function</span>(i){</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    indx <span class="ot">=</span> <span class="fu">which.max</span>(dt.yr[i,]) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(indx) <span class="sc">==</span> <span class="dv">0</span>){df.out <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">recent.yr =</span> <span class="cn">NA</span>, <span class="at">recent.pr =</span> <span class="cn">NA</span>, <span class="at">recent.mg =</span> <span class="cn">NA</span>)}</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>(<span class="at">df.out =</span> <span class="fu">data.frame</span>(<span class="at">recent.yr =</span> <span class="fu">as.numeric</span>(dt.yr[i, ..indx]), </span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>                             <span class="at">recent.pr =</span> <span class="fu">as.numeric</span>(dt.prob[i, ..indx]), </span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>                             <span class="at">recent.mg =</span> <span class="fu">as.numeric</span>(dt.mag[i, ..indx])))</span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(df.out)</span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rbindlist</span>()</span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>  biggest.change <span class="ot">=</span> <span class="fu">parLapply</span>(<span class="at">cl =</span> cl, <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dt.yr), <span class="at">fun =</span> <span class="cf">function</span>(i){</span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    indx <span class="ot">=</span> <span class="fu">which.max</span>(dt.prob[i,]) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make all values NA if it has NA inputs</span></span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(indx) <span class="sc">==</span> <span class="dv">0</span>){df.out <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">biggest.yr =</span> <span class="cn">NA</span>, <span class="at">biggest.pr =</span> <span class="cn">NA</span>, <span class="at">biggest.mg =</span> <span class="cn">NA</span>)}</span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>(<span class="at">df.out =</span> <span class="fu">data.frame</span>(<span class="at">biggest.yr =</span> <span class="fu">as.numeric</span>(dt.yr[i, ..indx]), </span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>                             <span class="at">biggest.pr =</span> <span class="fu">as.numeric</span>(dt.prob[i, ..indx]), </span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>                             <span class="at">biggest.mg =</span> <span class="fu">as.numeric</span>(dt.mag[i, ..indx])))</span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(df.out)</span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rbindlist</span>()</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopCluster</span>(cl)</span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>  <span class="co"># combine the outputs</span></span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>  out.dt <span class="ot">=</span> <span class="fu">cbind</span>(recent.change, biggest.change)</span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(out.dt) <span class="ot">&lt;-</span> <span class="fu">str_replace</span>(<span class="fu">names</span>(out.dt), <span class="st">"[.]"</span>, <span class="st">"_"</span>)</span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>  <span class="co"># output the rasters</span></span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(cur.nm <span class="cf">in</span> <span class="fu">names</span>(out.dt)){</span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>    vals <span class="ot">=</span> <span class="fu">pull</span>(out.dt, cur.nm) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>           <span class="fu">matrix</span>(<span class="at">nrow =</span> <span class="fu">nrow</span>(o2<span class="sc">$</span>chg.yr), <span class="at">ncol =</span> <span class="fu">ncol</span>(o2<span class="sc">$</span>chg.yr)) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>           <span class="fu">t</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>           <span class="fu">as.numeric</span>()</span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>    rb <span class="ot">=</span> indx.stk</span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    <span class="fu">values</span>(rb) <span class="ot">=</span> vals</span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    <span class="fu">writeRaster</span>(rb, <span class="fu">paste0</span>(<span class="st">"beast-outputs/"</span>, cur.nm, <span class="st">".tif"</span>), <span class="at">overwrite =</span> T)</span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"beast-outputs/biggest_pr.tif"</span>)){</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  o2 <span class="ot">=</span> <span class="fu">read_rds</span>(rds.out)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># this raster needs to be the same dimensions as the beast output</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  dim.rast <span class="ot">=</span> <span class="fu">paste0</span>(<span class="fu">dim</span>(indx.stk)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">collapse =</span> <span class="st">"x"</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  dim.beast <span class="ot">=</span> <span class="fu">paste0</span>(<span class="fu">dim</span>(o2<span class="sc">$</span>chg.yr)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">collapse =</span> <span class="st">"x"</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(dim.rast <span class="sc">!=</span> dim.beast){<span class="fu">cat</span>(<span class="st">" - Dimensions not equal; ending process"</span>); <span class="fu">return</span>()}</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># first, transform the array to rows</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  cl <span class="ot">=</span> <span class="fu">makeCluster</span>(<span class="fu">detectCores</span>() <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clusterEvalQ</span>(cl, {<span class="fu">library</span>(dplyr); <span class="fu">library</span>(data.table)})</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># years of change</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  dt.yr <span class="ot">=</span> <span class="fu">parApply</span>(<span class="at">cl =</span> cl, o2<span class="sc">$</span>chg.yr, <span class="at">MARGIN =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>                   <span class="cf">function</span>(x){<span class="fu">as.numeric</span>(x) <span class="sc">%&gt;%</span> <span class="fu">t</span>() <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rbindlist</span>()</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># probability of change</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  dt.prob <span class="ot">=</span> <span class="fu">parApply</span>(<span class="at">cl =</span> cl, o2<span class="sc">$</span>chg.prob, <span class="at">MARGIN =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), </span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>                     <span class="cf">function</span>(x){<span class="fu">as.numeric</span>(x) <span class="sc">%&gt;%</span> <span class="fu">t</span>() <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>            <span class="fu">rbindlist</span>()</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># magnitude of change</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  dt.mag <span class="ot">=</span> <span class="fu">parApply</span>(<span class="at">cl =</span> cl, o2<span class="sc">$</span>chg.mag, <span class="at">MARGIN =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), </span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">function</span>(x){<span class="fu">as.numeric</span>(x) <span class="sc">%&gt;%</span> <span class="fu">t</span>() <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()}) <span class="sc">%&gt;%</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>           <span class="fu">rbindlist</span>()</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add these to the parallel cluster</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clusterExport</span>(cl, <span class="fu">c</span>(<span class="st">"dt.yr"</span>, <span class="st">"dt.prob"</span>, <span class="st">"dt.mag"</span>))</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># what was the most recent change?</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  recent.change <span class="ot">=</span> <span class="fu">parLapply</span>(<span class="at">cl =</span> cl, <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dt.yr), <span class="at">fun =</span> <span class="cf">function</span>(i){</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    indx <span class="ot">=</span> <span class="fu">which.max</span>(dt.yr[i,]) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(indx) <span class="sc">==</span> <span class="dv">0</span>){df.out <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">recent.yr =</span> <span class="cn">NA</span>, <span class="at">recent.pr =</span> <span class="cn">NA</span>, <span class="at">recent.mg =</span> <span class="cn">NA</span>)}</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>(<span class="at">df.out =</span> <span class="fu">data.frame</span>(<span class="at">recent.yr =</span> <span class="fu">as.numeric</span>(dt.yr[i, ..indx]), </span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>                             <span class="at">recent.pr =</span> <span class="fu">as.numeric</span>(dt.prob[i, ..indx]), </span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>                             <span class="at">recent.mg =</span> <span class="fu">as.numeric</span>(dt.mag[i, ..indx])))</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(df.out)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rbindlist</span>()</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># what was the largest change?</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>  biggest.change <span class="ot">=</span> <span class="fu">parLapply</span>(<span class="at">cl =</span> cl, <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dt.yr), <span class="at">fun =</span> <span class="cf">function</span>(i){</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    indx <span class="ot">=</span> <span class="fu">which.max</span>(dt.prob[i,]) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make all values NA if it has NA inputs</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(indx) <span class="sc">==</span> <span class="dv">0</span>){df.out <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">biggest.yr =</span> <span class="cn">NA</span>, <span class="at">biggest.pr =</span> <span class="cn">NA</span>, <span class="at">biggest.mg =</span> <span class="cn">NA</span>)}</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>(<span class="at">df.out =</span> <span class="fu">data.frame</span>(<span class="at">biggest.yr =</span> <span class="fu">as.numeric</span>(dt.yr[i, ..indx]), </span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>                             <span class="at">biggest.pr =</span> <span class="fu">as.numeric</span>(dt.prob[i, ..indx]), </span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>                             <span class="at">biggest.mg =</span> <span class="fu">as.numeric</span>(dt.mag[i, ..indx])))</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(df.out)</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rbindlist</span>()</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopCluster</span>(cl) <span class="co"># close the parallel cluster</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>  <span class="co"># combine the outputs</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>  out.dt <span class="ot">=</span> <span class="fu">cbind</span>(recent.change, biggest.change)</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(out.dt) <span class="ot">&lt;-</span> <span class="fu">str_replace</span>(<span class="fu">names</span>(out.dt), <span class="st">"[.]"</span>, <span class="st">"_"</span>)</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>  <span class="co"># output the rasters</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(cur.nm <span class="cf">in</span> <span class="fu">names</span>(out.dt)){</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert the values in the table to an array with the same dimensions as before</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>    vals <span class="ot">=</span> <span class="fu">pull</span>(out.dt, cur.nm) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>           <span class="fu">matrix</span>(<span class="at">nrow =</span> <span class="fu">nrow</span>(o2<span class="sc">$</span>chg.yr), <span class="at">ncol =</span> <span class="fu">ncol</span>(o2<span class="sc">$</span>chg.yr)) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>           <span class="fu">t</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>           <span class="fu">as.numeric</span>()</span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>    rb <span class="ot">=</span> indx.stk</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>    <span class="co"># put those values into the raster</span></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>    <span class="fu">values</span>(rb) <span class="ot">=</span> vals</span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="co"># export it to disk</span></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>    <span class="fu">writeRaster</span>(rb, <span class="fu">paste0</span>(<span class="st">"beast-outputs/"</span>, cur.nm, <span class="st">".tif"</span>), <span class="at">overwrite =</span> T)</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="deriving-and-graphing-outputs" class="level2">
 <h2 class="anchored" data-anchor-id="deriving-and-graphing-outputs">Deriving and graphing outputs</h2>
-<p>Finally, let’s take a look at the outputs. Since BEAST detects lots of changes, we can filter out only those with a high probability, set by a threshold called <code>min.chg.prob</code>.</p>
-<p>In this example, there are three images selected which show a range of disturbance histories. We’ll show the BEAST outputs for all three, including the smoothed trend and the mapped disturbance probabilities.</p>
+<p>Finally, let’s take a look at the outputs. Since BEAST detects lots of changes, we can filter out only those with a high probability, set by a threshold we will call <code>min.chg.prob</code>.</p>
+<p>In this code, there are three example pixels selected which show a range of disturbance histories. We’ll show the BEAST outputs for all three, including the smoothed vegetation trend and the mapped disturbance probabilities.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># clean up the environment</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># terra::tmpFiles(remove = T); gc(verbose = F)</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># let's only consider something is a "change" if the BEAST probability is over a certain threshold (here, 0.5)</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>min.chg.prob <span class="ot">=</span> <span class="fl">0.5</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># We need to make a table to convert between XY points and Row/Col numbers, since the beast output is in an array</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>row.col.ids <span class="ot">=</span> <span class="fu">as.data.frame</span>(indx.stk, <span class="at">xy =</span> T, <span class="at">na.rm =</span> F) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>              <span class="fu">as.data.table</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(x, y) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">row.id =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(indx.stk), <span class="at">each =</span> <span class="fu">ncol</span>(indx.stk)),</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">col.id =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(indx.stk), <span class="at">times =</span> <span class="fu">nrow</span>(indx.stk)))</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co"># make a raster where pixel values are the row and column IDs from the above table</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>row.col.rast <span class="ot">=</span> <span class="fu">rast</span>(<span class="fu">as.data.frame</span>(row.col.ids), <span class="at">type =</span> <span class="st">"xyz"</span>, <span class="at">crs =</span> <span class="fu">crs</span>(indx.stk))</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co"># There are three example pixels to look at</span></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>a.xy <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">442216</span>, <span class="dv">5882983</span>)</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>b.xy <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">445096</span>, <span class="dv">5877673</span>)</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>c.xy <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">456700</span>, <span class="dv">5871102</span>)</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co"># What are the Row/Column numbers for each example pixel?</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>a.rc <span class="ot">=</span> <span class="fu">extract</span>(row.col.rast, a.xy) <span class="sc">%&gt;%</span> <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">name =</span> <span class="st">"Pixel A"</span>)</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>b.rc <span class="ot">=</span> <span class="fu">extract</span>(row.col.rast, b.xy) <span class="sc">%&gt;%</span> <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">name =</span> <span class="st">"Pixel B"</span>)</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>c.rc <span class="ot">=</span> <span class="fu">extract</span>(row.col.rast, c.xy) <span class="sc">%&gt;%</span> <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">name =</span> <span class="st">"Pixel C"</span>)</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co"># in this case, the output has already been run and saved to the path below</span></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"beast-outputs/beast_changes.csv"</span>)){</span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># read in the BEAST output</span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  o2 <span class="ot">=</span> <span class="fu">read_rds</span>(rds.out)</span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get the smoothed NBR values ("Y") from the BEAST output</span></span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  gg.dt <span class="ot">=</span> <span class="fu">bind_rows</span>(a.rc, b.rc, c.rc) <span class="sc">%&gt;%</span></span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>          <span class="fu">apply</span>(<span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(x){</span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>            rw <span class="ot">=</span> x[<span class="dv">1</span>] <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>            cl <span class="ot">=</span> x[<span class="dv">2</span>] <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>            nm <span class="ot">=</span> x[<span class="dv">3</span>] <span class="sc">%&gt;%</span> <span class="fu">as.character</span>()</span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            dt.out <span class="ot">=</span> <span class="fu">data.table</span>(<span class="at">name =</span> nm,</span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>                                <span class="at">time =</span> o2<span class="sc">$</span>time,</span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>                                <span class="at">trend =</span> o2<span class="sc">$</span>trend[rw, cl,],</span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>                                <span class="at">season =</span> o2<span class="sc">$</span>season[rw, cl,])</span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>            <span class="fu">return</span>(dt.out)</span>
-<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>        }) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>        <span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">Y =</span> trend <span class="sc">+</span> season)</span>
-<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>  <span class="co"># This data.table shows the times and probability of change detected by BEAST</span></span>
-<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>  chg.dt <span class="ot">=</span> <span class="fu">bind_rows</span>(a.rc, b.rc, c.rc) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>           <span class="fu">apply</span>(<span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(x){</span>
-<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>             rw <span class="ot">=</span> x[<span class="dv">1</span>] <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
-<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>             cl <span class="ot">=</span> x[<span class="dv">2</span>] <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
-<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>             nm <span class="ot">=</span> x[<span class="dv">3</span>] <span class="sc">%&gt;%</span> <span class="fu">as.character</span>()</span>
-<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>             change.dt <span class="ot">=</span> <span class="fu">data.table</span>(<span class="at">name =</span> nm,</span>
-<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">chg.prob =</span> o2<span class="sc">$</span>chg.prob[rw, cl,],</span>
-<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">chg.yr =</span> o2<span class="sc">$</span>chg.yr[rw, cl,],</span>
-<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">chg.mag =</span> o2<span class="sc">$</span>chg.mag[rw, cl,])    </span>
-<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>             <span class="fu">return</span>(change.dt)</span>
-<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>           }) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>           <span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>           <span class="fu">filter</span>(chg.prob <span class="sc">&gt;=</span> min.chg.prob) <span class="co"># filter out those below our threshold</span></span>
-<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>  <span class="co"># write both of these data tables</span></span>
-<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fwrite</span>(chg.dt, <span class="st">"beast-outputs/beast_changes.csv"</span>)</span>
-<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fwrite</span>(gg.dt, <span class="st">"beast-outputs/beast_trend.csv"</span>)</span>
-<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>chg.dt <span class="ot">=</span> <span class="fu">fread</span>(<span class="st">"beast-outputs/beast_changes.csv"</span>)</span>
-<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>gg.dt <span class="ot">=</span> <span class="fu">fread</span>(<span class="st">"beast-outputs/beast_trend.csv"</span>)</span>
-<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a><span class="co"># These are the raster layers output from BEAST in a previous step</span></span>
-<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>big.pr <span class="ot">=</span> <span class="fu">rast</span>(<span class="st">"beast-outputs/biggest_pr.tif"</span>)</span>
-<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a>big.pr[big.pr <span class="sc">&lt;=</span> min.chg.prob] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># filter out those below our threshold</span></span>
-<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>big.yr <span class="ot">=</span> <span class="fu">rast</span>(<span class="st">"beast-outputs/biggest_yr.tif"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>         <span class="fu">mask</span>(big.pr) <span class="co"># filter out pixels below our threshold</span></span>
-<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a><span class="co"># for the figure legend, we need the range of years with detected disturbance</span></span>
-<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a>yr.range <span class="ot">=</span> <span class="fu">global</span>(big.yr, <span class="fu">c</span>(<span class="st">"min"</span>, <span class="st">"max"</span>), <span class="at">na.rm =</span> T) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a>           <span class="fu">as.numeric</span>()</span>
-<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a><span class="co"># to display the example pixels, convert them into vectors</span></span>
-<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a>xy.vect <span class="ot">=</span> <span class="fu">rbind</span>(a.xy, b.xy, c.xy) <span class="sc">%&gt;%</span></span>
-<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a>          <span class="fu">as.data.table</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a>          <span class="fu">mutate</span>(., <span class="at">nm =</span> LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(.)]) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rename</span>(<span class="st">"X"</span> <span class="ot">=</span> <span class="st">"V1"</span>, <span class="st">"Y"</span> <span class="ot">=</span> <span class="st">"V2"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>          <span class="fu">vect</span>(<span class="at">geom =</span> <span class="fu">c</span>(<span class="st">"X"</span>, <span class="st">"Y"</span>), <span class="at">crs =</span> <span class="fu">crs</span>(indx.stk))</span>
-<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a><span class="co"># For each example pixel, show the smoothed NBR trend including any detected changes</span></span>
-<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a>nbr.plot <span class="ot">=</span> <span class="fu">ggplot</span>(gg.dt, <span class="fu">aes</span>(<span class="at">y =</span> Y, <span class="at">x =</span> time)) <span class="sc">+</span></span>
-<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>           <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a>           <span class="fu">geom_vline</span>(<span class="at">data =</span> chg.dt, <span class="fu">aes</span>(<span class="at">xintercept =</span> chg.yr, <span class="at">color =</span> chg.prob), <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>           <span class="fu">facet_wrap</span>(<span class="st">"name"</span>, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">strip.position =</span> <span class="st">"right"</span>) <span class="sc">+</span></span>
-<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a>           <span class="fu">scale_color_viridis_b</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(min.chg.prob, <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>           <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="st">"NBR"</span>, <span class="at">color =</span> <span class="st">"Change probability"</span>) <span class="sc">+</span> </span>
-<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>           <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>           <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
-<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a><span class="co"># show the BEAST output raster with the year of change</span></span>
-<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>yr.plot <span class="ot">=</span> <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_spatraster</span>(<span class="at">data =</span> big.yr) <span class="sc">+</span></span>
-<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_spatvector_text</span>(<span class="at">data =</span> xy.vect, <span class="fu">aes</span>(<span class="at">label =</span> nm), <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">size =</span> <span class="dv">8</span>) <span class="sc">+</span></span>
-<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_sf</span>(<span class="at">expand =</span> F, <span class="at">label_axes =</span> <span class="st">"----"</span>) <span class="sc">+</span></span>
-<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a>          <span class="fu">scale_fill_viridis_b</span>(<span class="at">option =</span> <span class="st">"magma"</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">floor</span>(yr.range[<span class="dv">1</span>]), <span class="fu">ceiling</span>(yr.range[<span class="dv">2</span>]), <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
-<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">fill =</span> <span class="st">"Change Year"</span>)</span>
-<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a><span class="co"># show the BEAST output raster with the probability of change</span></span>
-<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>pr.plot <span class="ot">=</span> <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_spatraster</span>(<span class="at">data =</span> big.pr) <span class="sc">+</span></span>
-<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_spatvector_text</span>(<span class="at">data =</span> xy.vect, <span class="fu">aes</span>(<span class="at">label =</span> nm), <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">8</span>) <span class="sc">+</span></span>
-<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_sf</span>(<span class="at">expand =</span> F, <span class="at">label_axes =</span> <span class="st">"----"</span>) <span class="sc">+</span></span>
-<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a>          <span class="fu">scale_fill_viridis_b</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(min.chg.prob, <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">fill =</span> <span class="st">"Change</span><span class="sc">\n</span><span class="st">Probability"</span>)</span>
-<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the output using the patchwork package</span></span>
-<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a>nbr.plot <span class="sc">+</span> (yr.plot <span class="sc">/</span> pr.plot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># clean up the environment (optional)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># terra::tmpFiles(remove = T); gc(verbose = F)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># let's only consider something is a "change" if the BEAST probability is over a certain threshold (here, 0.5)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>min.chg.prob <span class="ot">=</span> <span class="fl">0.5</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># We need to make a table to convert between XY points and Row/Col numbers, since the beast output is in an array</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>row.col.ids <span class="ot">=</span> <span class="fu">as.data.frame</span>(indx.stk, <span class="at">xy =</span> T, <span class="at">na.rm =</span> F) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>              <span class="fu">as.data.table</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(x, y) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">row.id =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(indx.stk), <span class="at">each =</span> <span class="fu">ncol</span>(indx.stk)),</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">col.id =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(indx.stk), <span class="at">times =</span> <span class="fu">nrow</span>(indx.stk)))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># make a raster where pixel values are the row and column IDs from the above table</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>row.col.rast <span class="ot">=</span> <span class="fu">rast</span>(<span class="fu">as.data.frame</span>(row.col.ids), <span class="at">type =</span> <span class="st">"xyz"</span>, <span class="at">crs =</span> <span class="fu">crs</span>(indx.stk))</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># There are three example pixels, listed with their UTM coordinates</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>a.xy <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">442216</span>, <span class="dv">5882983</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>b.xy <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">445096</span>, <span class="dv">5877673</span>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>c.xy <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">456700</span>, <span class="dv">5871102</span>)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co"># What are the Row/Column numbers for each example pixel?</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>a.rc <span class="ot">=</span> <span class="fu">extract</span>(row.col.rast, a.xy) <span class="sc">%&gt;%</span> <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">name =</span> <span class="st">"Pixel A"</span>)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>b.rc <span class="ot">=</span> <span class="fu">extract</span>(row.col.rast, b.xy) <span class="sc">%&gt;%</span> <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">name =</span> <span class="st">"Pixel B"</span>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>c.rc <span class="ot">=</span> <span class="fu">extract</span>(row.col.rast, c.xy) <span class="sc">%&gt;%</span> <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">name =</span> <span class="st">"Pixel C"</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co"># in this case, the output has already been run and saved to the path below</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"beast-outputs/beast_changes.csv"</span>)){</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># read in the BEAST output from a previous step</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  o2 <span class="ot">=</span> <span class="fu">read_rds</span>(rds.out)</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get the smoothed NBR values ("Y") from the BEAST output</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  gg.dt <span class="ot">=</span> <span class="fu">bind_rows</span>(a.rc, b.rc, c.rc) <span class="sc">%&gt;%</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>          <span class="fu">apply</span>(<span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(x){</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>            rw <span class="ot">=</span> x[<span class="dv">1</span>] <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>            cl <span class="ot">=</span> x[<span class="dv">2</span>] <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>            nm <span class="ot">=</span> x[<span class="dv">3</span>] <span class="sc">%&gt;%</span> <span class="fu">as.character</span>()</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>            dt.out <span class="ot">=</span> <span class="fu">data.table</span>(<span class="at">name =</span> nm,</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>                                <span class="at">time =</span> o2<span class="sc">$</span>time,</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>                                <span class="at">trend =</span> o2<span class="sc">$</span>trend[rw, cl,],</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>                                <span class="at">season =</span> o2<span class="sc">$</span>season[rw, cl,])</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>            <span class="fu">return</span>(dt.out)</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>        }) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>        <span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">Y =</span> trend <span class="sc">+</span> season)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>  <span class="co"># This data.table shows the times and probability of change detected by BEAST</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>  chg.dt <span class="ot">=</span> <span class="fu">bind_rows</span>(a.rc, b.rc, c.rc) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>           <span class="fu">apply</span>(<span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(x){</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>             rw <span class="ot">=</span> x[<span class="dv">1</span>] <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>             cl <span class="ot">=</span> x[<span class="dv">2</span>] <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>             nm <span class="ot">=</span> x[<span class="dv">3</span>] <span class="sc">%&gt;%</span> <span class="fu">as.character</span>()</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>             change.dt <span class="ot">=</span> <span class="fu">data.table</span>(<span class="at">name =</span> nm,</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">chg.prob =</span> o2<span class="sc">$</span>chg.prob[rw, cl,],</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">chg.yr =</span> o2<span class="sc">$</span>chg.yr[rw, cl,],</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">chg.mag =</span> o2<span class="sc">$</span>chg.mag[rw, cl,])    </span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>             <span class="fu">return</span>(change.dt)</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>           }) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>           <span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>           <span class="fu">filter</span>(chg.prob <span class="sc">&gt;=</span> min.chg.prob) <span class="co"># filter out those below our threshold</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>  <span class="co"># write both of these data tables</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fwrite</span>(chg.dt, <span class="st">"beast-outputs/beast_changes.csv"</span>)</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fwrite</span>(gg.dt, <span class="st">"beast-outputs/beast_trend.csv"</span>)</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>chg.dt <span class="ot">=</span> <span class="fu">fread</span>(<span class="st">"beast-outputs/beast_changes.csv"</span>)</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>gg.dt <span class="ot">=</span> <span class="fu">fread</span>(<span class="st">"beast-outputs/beast_trend.csv"</span>)</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a><span class="co"># These are the raster layers output from BEAST in a previous step</span></span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>big.pr <span class="ot">=</span> <span class="fu">rast</span>(<span class="st">"beast-outputs/biggest_pr.tif"</span>)</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>big.pr[big.pr <span class="sc">&lt;=</span> min.chg.prob] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># filter out those below our threshold</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>big.yr <span class="ot">=</span> <span class="fu">rast</span>(<span class="st">"beast-outputs/biggest_yr.tif"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>         <span class="fu">mask</span>(big.pr) <span class="co"># filter out pixels below our threshold</span></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a><span class="co"># for the figure legend, we need the range of years with detected disturbance</span></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>yr.range <span class="ot">=</span> <span class="fu">global</span>(big.yr, <span class="fu">c</span>(<span class="st">"min"</span>, <span class="st">"max"</span>), <span class="at">na.rm =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>           <span class="fu">as.numeric</span>()</span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a><span class="co"># to display the example pixels, convert them into vectors</span></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>xy.vect <span class="ot">=</span> <span class="fu">rbind</span>(a.xy, b.xy, c.xy) <span class="sc">%&gt;%</span></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>          <span class="fu">as.data.table</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>          <span class="fu">mutate</span>(., <span class="at">nm =</span> LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(.)]) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rename</span>(<span class="st">"X"</span> <span class="ot">=</span> <span class="st">"V1"</span>, <span class="st">"Y"</span> <span class="ot">=</span> <span class="st">"V2"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>          <span class="fu">vect</span>(<span class="at">geom =</span> <span class="fu">c</span>(<span class="st">"X"</span>, <span class="st">"Y"</span>), <span class="at">crs =</span> <span class="fu">crs</span>(indx.stk))</span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a><span class="co"># For each example pixel, show the smoothed NBR trend including any detected changes</span></span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a>nbr.plot <span class="ot">=</span> <span class="fu">ggplot</span>(gg.dt, <span class="fu">aes</span>(<span class="at">y =</span> Y, <span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a>           <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a>           <span class="fu">geom_vline</span>(<span class="at">data =</span> chg.dt, <span class="fu">aes</span>(<span class="at">xintercept =</span> chg.yr, <span class="at">color =</span> chg.prob), <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>           <span class="fu">facet_wrap</span>(<span class="st">"name"</span>, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">strip.position =</span> <span class="st">"right"</span>) <span class="sc">+</span></span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>           <span class="fu">scale_color_viridis_b</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(min.chg.prob, <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a>           <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="st">"NBR"</span>, <span class="at">color =</span> <span class="st">"Change probability"</span>) <span class="sc">+</span> </span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a>           <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a>           <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a><span class="co"># show the BEAST output raster with the year of change</span></span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a>yr.plot <span class="ot">=</span> <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_spatraster</span>(<span class="at">data =</span> big.yr) <span class="sc">+</span></span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_spatvector_text</span>(<span class="at">data =</span> xy.vect, <span class="fu">aes</span>(<span class="at">label =</span> nm), <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">size =</span> <span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_sf</span>(<span class="at">expand =</span> F, <span class="at">label_axes =</span> <span class="st">"----"</span>) <span class="sc">+</span></span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a>          <span class="fu">scale_fill_viridis_b</span>(<span class="at">option =</span> <span class="st">"magma"</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">floor</span>(yr.range[<span class="dv">1</span>]), <span class="fu">ceiling</span>(yr.range[<span class="dv">2</span>]), <span class="at">by =</span> <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb9-111"><a href="#cb9-111" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">fill =</span> <span class="st">"Change Year"</span>)</span>
+<span id="cb9-112"><a href="#cb9-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a><span class="co"># show the BEAST output raster with the probability of change</span></span>
+<span id="cb9-114"><a href="#cb9-114" aria-hidden="true" tabindex="-1"></a>pr.plot <span class="ot">=</span> <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb9-115"><a href="#cb9-115" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_spatraster</span>(<span class="at">data =</span> big.pr) <span class="sc">+</span></span>
+<span id="cb9-116"><a href="#cb9-116" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_spatvector_text</span>(<span class="at">data =</span> xy.vect, <span class="fu">aes</span>(<span class="at">label =</span> nm), <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb9-117"><a href="#cb9-117" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_sf</span>(<span class="at">expand =</span> F, <span class="at">label_axes =</span> <span class="st">"----"</span>) <span class="sc">+</span></span>
+<span id="cb9-118"><a href="#cb9-118" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb9-119"><a href="#cb9-119" aria-hidden="true" tabindex="-1"></a>          <span class="fu">scale_fill_viridis_b</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(min.chg.prob, <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb9-120"><a href="#cb9-120" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">fill =</span> <span class="st">"Change</span><span class="sc">\n</span><span class="st">Probability"</span>)</span>
+<span id="cb9-121"><a href="#cb9-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-122"><a href="#cb9-122" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the output using the patchwork package</span></span>
+<span id="cb9-123"><a href="#cb9-123" aria-hidden="true" tabindex="-1"></a>nbr.plot <span class="sc">+</span> (yr.plot <span class="sc">/</span> pr.plot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
